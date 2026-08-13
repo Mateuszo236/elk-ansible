@@ -1,3 +1,8 @@
 ---
 elk_version: "8.12.0"
 elk_dir: "/home/{{ ansible_user_id }}/elk-stack"
+zeek_interface: "eth1"
+
+zeek_local_networks:
+  - "192.168.157.0/24"
+filebeat_logstash_host: "127.0.0.1:15044"

@@ -1,2 +1,5 @@
-[local]
+[elk_server]
 localhost ansible_connection=local
+
+[ot_endpoints]
+kali_ot ansible_host=192.168.157.210 ansible_user=mateusz

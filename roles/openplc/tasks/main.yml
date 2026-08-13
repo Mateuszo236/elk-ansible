@@ -1,0 +1,98 @@
+---
+- name: Install OpenPLC build dependencies
+  ansible.builtin.apt:
+    name:
+      - git
+      - build-essential
+      - gcc
+      - make
+      - cmake
+      - python3-dev
+      - python3-pip
+      - python3-venv
+    state: present
+    update_cache: true
+
+- name: Clone OpenPLC Runtime v4 repository
+  ansible.builtin.git:
+    repo: https://github.com/Autonomy-Logic/openplc-runtime.git
+    dest: /opt/openplc-runtime
+    version: development
+    update: false
+
+- name: Check whether OpenPLC Runtime is already installed
+  ansible.builtin.stat:
+    path: /etc/systemd/system/openplc-runtime.service
+  register: openplc_service
+
+- name: Install OpenPLC Runtime
+  ansible.builtin.command:
+    cmd: ./install.sh
+    chdir: /opt/openplc-runtime
+  when: not openplc_service.stat.exists
+  changed_when: true
+
+- name: Ensure OpenPLC Runtime service is enabled and running
+  ansible.builtin.systemd:
+    name: openplc-runtime
+    enabled: true
+    state: started
+    daemon_reload: true
+
+- name: Deploy Modbus Slave configuration
+  ansible.builtin.template:
+    src: modbus_slave_config.json.j2
+    dest: /opt/openplc-runtime/core/src/drivers/plugins/python/modbus_slave/modbus_slave_config.json
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart OpenPLC Runtime
+
+- name: Deploy OpenPLC plugin configuration
+  ansible.builtin.template:
+    src: plugins.conf.j2
+    dest: /opt/openplc-runtime/plugins.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart OpenPLC Runtime
+
+- name: Check whether Modbus Slave virtual environment exists
+  ansible.builtin.stat:
+    path: /opt/openplc-runtime/venvs/modbus_slave/bin/python
+  register: modbus_slave_venv
+
+- name: Create Modbus Slave virtual environment
+  ansible.builtin.command:
+    cmd: bash scripts/manage_plugin_venvs.sh create modbus_slave
+    chdir: /opt/openplc-runtime
+  when: not modbus_slave_venv.stat.exists
+  notify: Restart OpenPLC Runtime
+
+- name: Check whether pymodbus is installed
+  ansible.builtin.command:
+    cmd: /opt/openplc-runtime/venvs/modbus_slave/bin/python -c "import pymodbus"
+  register: pymodbus_check
+  changed_when: false
+  failed_when: false
+
+- name: Install Modbus Slave dependencies
+  ansible.builtin.command:
+    cmd: bash scripts/manage_plugin_venvs.sh install modbus_slave
+    chdir: /opt/openplc-runtime
+  when: pymodbus_check.rc != 0
+  notify: Restart OpenPLC Runtime
+
+- name: Apply OpenPLC configuration changes
+  ansible.builtin.meta: flush_handlers
+
+- name: Check OpenPLC Runtime service
+  ansible.builtin.command:
+    cmd: systemctl is-active openplc-runtime
+  register: openplc_status
+  changed_when: false
+
+- name: Display OpenPLC Runtime status
+  ansible.builtin.debug:
+    var: openplc_status.stdout
+

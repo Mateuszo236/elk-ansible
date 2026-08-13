@@ -1,0 +1,5 @@
+---
+- name: Deploy Zeek
+  ansible.builtin.command:
+    cmd: /opt/zeek/bin/zeekctl deploy
+  changed_when: true

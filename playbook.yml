@@ -1,9 +1,27 @@
 ---
-- name: Deploy full ELK Stack via Ansible Roles
-  hosts: localhost
+- name: Deploy ELK stack locally
+  hosts: elk_server
   connection: local
-  become: yes
-  
+  become: true
+
   roles:
-    - docker
-    - elk
+    - role: docker
+      tags: docker
+
+    - role: elk
+      tags: elk
+
+
+- name: Configure OT monitoring endpoint
+  hosts: ot_endpoints
+  become: true
+
+  roles:
+    - role: openplc
+      tags: openplc
+
+    - role: zeek
+      tags: zeek
+
+    - role: filebeat
+      tags: filebeat

@@ -1,0 +1,30 @@
+---
+filebeat.inputs:
+  - type: filestream
+    id: zeek-json
+    enabled: true
+
+    paths:
+      - /opt/zeek/logs/current/conn.log
+      - /opt/zeek/logs/current/dns.log
+      - /opt/zeek/logs/current/ssh.log
+      - /opt/zeek/logs/current/weird.log
+      - /opt/zeek/logs/current/notice.log
+      - /opt/zeek/logs/current/modbus.log
+
+    parsers:
+      - ndjson:
+          target: ""
+          expand_keys: true
+          add_error_key: true
+
+    fields:
+      event.dataset: zeek
+      observer.type: zeek
+    fields_under_root: true
+
+output.logstash:
+  hosts:
+    - "{{ filebeat_logstash_host }}"
+
+logging.level: info

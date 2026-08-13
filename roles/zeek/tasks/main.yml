@@ -1,0 +1,72 @@
+---
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - curl
+      - gpg
+    state: present
+    update_cache: true
+
+- name: Add Zeek repository signing key
+  ansible.builtin.shell: |
+    curl -fsSL https://download.opensuse.org/repositories/security:/zeek/Debian_Testing/Release.key \
+    | gpg --dearmor \
+    | tee /usr/share/keyrings/zeek.gpg > /dev/null
+  args:
+    creates: /usr/share/keyrings/zeek.gpg
+
+- name: Add Zeek repository
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/zeek.list
+    content: |
+      deb [signed-by=/usr/share/keyrings/zeek.gpg] https://download.opensuse.org/repositories/security:/zeek/Debian_Testing/ /
+    mode: "0644"
+
+- name: Update APT cache after adding Zeek repository
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install Zeek
+  ansible.builtin.apt:
+    name: zeek
+    state: present
+
+- name: Check installed Zeek version
+  ansible.builtin.command: /opt/zeek/bin/zeek --version
+  register: zeek_version
+  changed_when: false
+
+- name: Display Zeek version
+  ansible.builtin.debug:
+    var: zeek_version.stdout
+
+- name: Deploy Zeek node configuration
+  ansible.builtin.template:
+    src: node.cfg.j2
+    dest: /opt/zeek/etc/node.cfg
+    mode: "0644"
+  notify: Deploy Zeek
+
+- name: Deploy Zeek local networks configuration
+  ansible.builtin.template:
+    src: networks.cfg.j2
+    dest: /opt/zeek/etc/networks.cfg
+    mode: "0644"
+  notify: Deploy Zeek
+
+- name: Deploy Zeek site configuration
+  ansible.builtin.template:
+    src: local.zeek.j2
+    dest: /opt/zeek/share/zeek/site/local.zeek
+    mode: "0644"
+  notify: Deploy Zeek
+
+- name: Check Zeek configuration
+  ansible.builtin.command:
+    cmd: /opt/zeek/bin/zeekctl check
+  register: zeek_check
+  changed_when: false
+
+- name: Display Zeek configuration check
+  ansible.builtin.debug:
+    var: zeek_check.stdout_lines

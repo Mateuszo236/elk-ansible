@@ -1,0 +1,6 @@
+---
+- name: Restart OpenPLC Runtime
+  ansible.builtin.systemd:
+    name: openplc-runtime
+    state: restarted
+    daemon_reload: true
