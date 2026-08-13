@@ -1,0 +1,9 @@
+---
+- name: Deploy full ELK Stack via Ansible Roles
+  hosts: localhost
+  connection: local
+  become: yes
+  
+  roles:
+    - docker
+    - elk

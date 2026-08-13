@@ -1,0 +1,34 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install required system packages
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+    state: present
+
+- name: Install Docker and Docker Compose v2 via apt
+  apt:
+    name:
+      - docker.io
+      - docker-compose-v2
+    state: present
+
+- name: Ensure docker service is running and enabled
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Add current user to docker group
+  user:
+    name: "{{ ansible_user_id }}"
+    groups: docker
+    append: yes

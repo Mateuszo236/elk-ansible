@@ -1,0 +1,3 @@
+---
+elk_version: "8.12.0"
+elk_dir: "/home/{{ ansible_user_id }}/elk-stack"

@@ -1,0 +1,23 @@
+---
+- name: Ensure ELK deployment directory exists
+  file:
+    path: "{{ elk_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Configure vm.max_map_count for Elasticsearch (Linux Kernel requirement)
+  sysctl:
+    name: vm.max_map_count
+    value: '262144'
+    state: present
+    reload: yes
+
+- name: Generate docker-compose.yml from template
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{ elk_dir }}/docker-compose.yml"
+
+- name: Start ELK stack using Docker Compose v2
+  community.docker.docker_compose_v2:
+    project_src: "{{ elk_dir }}"
+    state: present
