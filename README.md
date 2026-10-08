@@ -91,37 +91,17 @@ Kibana
 
 Modbus/TCP operations collected by Zeek and visualised in Kibana.
 
-![OT ICS Security Monitoring Dashboard](docs/screenshots/06-ot-security-dashboard.png)
+![OT ICS Security Monitoring Dashboard](docs/screenshots/06_final_dashboard.png)
 
-### Modbus/TCP traffic detected by Zeek
+![Zeek Modbus Detection](docs/screenshots/04_zeek_modbus_detection.png)
 
-Zeek identifies industrial protocol operations including `READ_HOLDING_REGISTERS` and `WRITE_SINGLE_REGISTER`.
+![Kibana Discover](docs/screenshots/05_kibana_discover.png)
 
-![Zeek Modbus Detection](docs/screenshots/04-zeek-modbus-detection.png)
+![Ansible Deployment](docs/screenshots/01_ansible_deployment.png)
 
-### Modbus events in Elasticsearch
+![OpenPLC Program](docs/screenshots/02_openplc_program.png)
 
-Zeek events forwarded through Filebeat and Logstash are available for analysis in Kibana Discover.
-
-![Kibana Discover](docs/screenshots/05-kibana-discover.png)
-
-### Automated deployment with Ansible
-
-Ansible installs and configures the ELK stack and OT monitoring components.
-
-![Ansible Deployment](docs/screenshots/01-ansible-deployment.png)
-
-### OpenPLC test program
-
-OpenPLC Runtime is used to simulate an industrial controller and expose process variables through Modbus/TCP.
-
-![OpenPLC Program](docs/screenshots/02-openplc-program.png)
-
-### OpenPLC Modbus configuration
-
-The laboratory uses a Modbus/TCP slave running on TCP port `5020`.
-
-![OpenPLC Modbus Configuration](docs/screenshots/03-openplc-modbus.png)
+![OpenPLC Modbus Configuration](docs/screenshots/03_openplc_modbus.png)
 
 ## Project status
 
